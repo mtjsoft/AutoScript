@@ -6,13 +6,18 @@ import cn.mtjsoft.utils.FileUtils
 import org.dom4j.Document
 import org.dom4j.Element
 import java.awt.Toolkit
-import java.io.*
+import java.awt.event.WindowEvent
+import java.awt.event.WindowListener
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
 import javax.swing.JFrame
 import javax.swing.JOptionPane
+import kotlin.system.exitProcess
 
 class AutoWindow : JFrame() {
 
@@ -36,6 +41,7 @@ class AutoWindow : JFrame() {
         setSize(500, 600)
         setLocationRelativeTo(null)
         isVisible = true
+        addWindowCloseListener(this)
     }
 
     /**
@@ -199,6 +205,53 @@ class AutoWindow : JFrame() {
                 append("\n")
             }
         }
+        // 处理自动滚动到最底部
         autoScriptWindow.result.caretPosition = autoScriptWindow.result.text.length
     }
+
+    /**
+     * 处理关闭
+     */
+    private fun addWindowCloseListener(jFrame: JFrame) {
+        jFrame.defaultCloseOperation = DO_NOTHING_ON_CLOSE
+        jFrame.addWindowListener(object : WindowListener {
+            override fun windowOpened(e: WindowEvent?) {
+            }
+
+            override fun windowClosing(e: WindowEvent) {
+                val option = JOptionPane.showConfirmDialog(
+                    jFrame, "确定退出吗?", "提示",
+                    JOptionPane.YES_NO_OPTION
+                )
+                if (option == JOptionPane.YES_OPTION) {
+                    if (e.window === jFrame) {
+                        jFrame.dispose()
+                        exitProcess(0)
+                    } else {
+                        return
+                    }
+                } else if (option == JOptionPane.NO_OPTION) {
+                    if (e.window === jFrame) {
+                        return
+                    }
+                }
+            }
+
+            override fun windowClosed(e: WindowEvent?) {
+            }
+
+            override fun windowIconified(e: WindowEvent?) {
+            }
+
+            override fun windowDeiconified(e: WindowEvent?) {
+            }
+
+            override fun windowActivated(e: WindowEvent?) {
+            }
+
+            override fun windowDeactivated(e: WindowEvent?) {
+            }
+        })
+    }
+
 }
