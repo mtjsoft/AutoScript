@@ -5,6 +5,7 @@ import cn.mtjsoft.utils.DomXmlUtils
 import cn.mtjsoft.utils.FileUtils
 import org.dom4j.Document
 import org.dom4j.Element
+import java.awt.Image
 import java.awt.Toolkit
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
@@ -15,8 +16,10 @@ import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
+import javax.swing.JFileChooser
 import javax.swing.JFrame
 import javax.swing.JOptionPane
+import javax.swing.JTextField
 import kotlin.system.exitProcess
 
 class AutoWindow : JFrame() {
@@ -25,18 +28,33 @@ class AutoWindow : JFrame() {
 
     private val singleThreadExecutor = Executors.newSingleThreadExecutor()
 
+    private val icon: Image
+
+    private var autoBuildProgressNUmber = 10
+
+    private var rpPath = ""
+    private var ppPath = ""
+
     init {
-        title = "资源文件替换脚本"
-        iconImage = Toolkit.getDefaultToolkit().createImage(this.javaClass.getResource("/image/icon72.png"))
+        title = "资源替换自动打包工具v1.0.0"
+        icon = Toolkit.getDefaultToolkit().createImage(this.javaClass.getResource("/image/icon72.png"))
+        iconImage = icon
     }
 
     fun showWindow() {
         isResizable = true
         contentPane.add(AutoScriptWindow().apply {
             autoScriptWindow = this
+            rpBtn.addActionListener {
+                chooseFile(rp)
+            }
+            ppBtn.addActionListener {
+                chooseFile(pp)
+            }
             ok.addActionListener {
                 okClick()
             }
+            progressBar.isVisible = false
         }.root)
         setSize(500, 600)
         setLocationRelativeTo(null)
@@ -49,55 +67,131 @@ class AutoWindow : JFrame() {
      */
     private fun okClick() {
         autoScriptWindow.apply {
-            val rp = rp.text
-            if (rp.isNullOrEmpty()) {
+            rpPath = rp.text
+            if (rpPath.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "请输入待替换资源文件夹.", "提示", JOptionPane.ERROR_MESSAGE)
                 return
             }
-            val rpFileNames = FileUtils.findFileNameList(rp)
+            val rpFileNames = FileUtils.findFileNameList(rpPath)
             if (rpFileNames.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "待替换资源文件夹为空.", "错误", JOptionPane.ERROR_MESSAGE)
                 return
             }
-            val pp = pp.text
-            if (pp.isNullOrEmpty()) {
+            ppPath = pp.text
+            if (ppPath.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "请输入目标项目目录.", "提示", JOptionPane.ERROR_MESSAGE)
                 return
             }
-            val ppFileNames = FileUtils.findFileNameList(pp)
+            val ppFileNames = FileUtils.findFileNameList(ppPath)
             if (ppFileNames.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "目标项目目录为空.", "错误", JOptionPane.ERROR_MESSAGE)
                 return
             }
+            // 进度条未走完
+            if (progressBar.isVisible && progressBar.maximum > 0 && progressBar.value > 0 && progressBar.value < progressBar.maximum) {
+                JOptionPane.showMessageDialog(null, "当前任务还未结束，请稍后.", "提示", JOptionPane.WARNING_MESSAGE)
+                return
+            }
             result.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINESE).format(Date()) + "\n"
-            printResult("=====================================")
             val debug = debug.isSelected
             val alpha = alpha.isSelected
             val release = release.isSelected
             val res = "/app/src/main/res"
-            val resFileNames = FileUtils.findFileNameList(rp)
+            // 获取总的需要替换的文件个数
+            setProgressBar(rpPath)
+            printResult("=====================================")
+            val resFileNames = FileUtils.findFileNameList(rpPath)
             // 资源替换
             for (name in resFileNames) {
                 if (name.startsWith("drawable") || name.startsWith("mipmap") || name.startsWith("anim") || name.startsWith(
                         "color"
                     ) || name.startsWith("raw")
                 ) {
-                    testRpDrawable(rp, pp + res, name)
+                    testRpDrawable(rpPath, ppPath + res, name)
                     continue
                 }
                 if (name.startsWith("values") || name.startsWith("xml")) {
-                    testRpXml(rp, pp + res, name)
+                    testRpXml(rpPath, ppPath + res, name)
                 }
             }
             // 自动打包
-            if (release) {
-                cmd("cd /d $pp && gradlew :app:assembleRelease", "gradlew :app:assembleRelease")
+            if (debug) {
+                cmd("cd /d $ppPath && gradlew :clean && gradlew :app:assembleDebug", "gradlew :app:assembleDebug")
             }
             if (alpha) {
-                cmd("cd /d $pp && gradlew :app:assembleAlpha", "gradlew :app:assembleAlpha")
+                cmd("cd /d $ppPath && gradlew :clean && gradlew :app:assembleAlpha", "gradlew :app:assembleAlpha")
             }
-            if (debug) {
-                cmd("cd /d $pp && gradlew :app:assembleDebug", "gradlew :app:assembleDebug")
+            if (release) {
+                cmd("cd /d $ppPath && gradlew :clean && gradlew :app:assembleRelease", "gradlew :app:assembleRelease")
+            }
+        }
+    }
+
+    /**
+     * 初始化进度条
+     */
+    private fun setProgressBar(rp: String) {
+        singleThreadExecutor.execute {
+            var size = FileUtils.findAllFileList(rp).size
+            // 计算每一个自动打包，算资源替换的10%，默认10
+            val number = size * 0.1
+            autoBuildProgressNUmber = if (number < 10) {
+                10
+            } else {
+                number.toInt()
+            }
+            autoScriptWindow.apply {
+                if (debug.isSelected) {
+                    size += autoBuildProgressNUmber
+                }
+                if (alpha.isSelected) {
+                    size += autoBuildProgressNUmber
+                }
+                if (release.isSelected) {
+                    size += autoBuildProgressNUmber
+                }
+                progressBar.isVisible = size > 0
+                progressBar.value = 0
+                progressBar.minimum = 0
+                progressBar.maximum = size
+            }
+        }
+    }
+
+    /**
+     * 每循环一个文件，进度 + 1
+     */
+    private fun updateProgressBar(addNUm: Int = 1, isOver: Boolean = false) {
+        var progress = autoScriptWindow.progressBar.value + addNUm
+        if (progress > autoScriptWindow.progressBar.maximum || isOver) {
+            progress = autoScriptWindow.progressBar.maximum
+        }
+        autoScriptWindow.progressBar.value = progress
+        if (progress >= autoScriptWindow.progressBar.maximum) {
+            // 完成时，将完整日志保存至，资源文件目录
+            singleThreadExecutor.execute {
+                val name = SimpleDateFormat("yyyyMMdd_HH_mm_ss_sss", Locale.CHINESE).format(Date())
+                FileUtils.writeStringToFile(rpPath + File.separator + "$name.txt", autoScriptWindow.result.text)
+            }
+        }
+    }
+
+    /**
+     * 选择文件
+     */
+    private fun chooseFile(jTextField: JTextField) {
+        val jFrame = JFrame()
+        jFrame.iconImage = icon
+        val jfc = JFileChooser()
+        jfc.dialogTitle = "选择文件夹"
+        jfc.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+        val returnVal = jfc.showOpenDialog(jFrame)
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            val file = jfc.selectedFile
+            file?.let {
+                if (it.isDirectory) {
+                    jTextField.text = it.absolutePath
+                }
             }
         }
     }
@@ -116,6 +210,7 @@ class AutoWindow : JFrame() {
                     FileUtils.copy(file.absolutePath, targetFile.absolutePath)
                     printResult("$name >>> copy 【" + file.name + "】")
                 }
+                updateProgressBar()
             }
             printResult("$name >>> 结束")
             printResult("=====================================")
@@ -129,43 +224,42 @@ class AutoWindow : JFrame() {
         singleThreadExecutor.execute {
             val resFiles = FileUtils.findFileList(resPath + File.separator + name)
             for (file in resFiles) {
-                if (!file.name.endsWith("xml")) {
-                    continue
-                }
-
-                val targetFile = File(projectPath + File.separator + name + File.separator + file.name)
-                if (targetFile.exists()) {
-                    val resDocument: Document? = DomXmlUtils.load(file.absolutePath)
-                    val targetDocument: Document? = DomXmlUtils.load(targetFile.absolutePath)
-                    if (resDocument != null && targetDocument != null) {
-                        printResult("=====================================")
-                        printResult("${file.name} >>> 开始")
-                        val resElements = resDocument.rootElement.elements()
-                        val targetElements = targetDocument.rootElement.elements()
-                        var changeCount = 0
-                        for (element in resElements) {
-                            val attrName = element.attributeValue("name")
-                            for (i in targetElements.indices) {
-                                val targetElement = targetElements[i]
-                                val attrName2 = targetElement.attributeValue("name")
-                                if (attrName == attrName2) {
-                                    if (targetElement.parent.remove(targetElement)) {
-                                        targetElements.removeAt(i)
-                                        targetElements.add(i, element.clone() as Element)
-                                        changeCount++
-                                        printResult("update >>> ${targetElement.qName.name} >>> $attrName2")
+                if (file.name.endsWith("xml")) {
+                    val targetFile = File(projectPath + File.separator + name + File.separator + file.name)
+                    if (targetFile.exists()) {
+                        val resDocument: Document? = DomXmlUtils.load(file.absolutePath)
+                        val targetDocument: Document? = DomXmlUtils.load(targetFile.absolutePath)
+                        if (resDocument != null && targetDocument != null) {
+                            printResult("=====================================")
+                            printResult("${file.name} >>> 开始")
+                            val resElements = resDocument.rootElement.elements()
+                            val targetElements = targetDocument.rootElement.elements()
+                            var changeCount = 0
+                            for (element in resElements) {
+                                val attrName = element.attributeValue("name")
+                                for (i in targetElements.indices) {
+                                    val targetElement = targetElements[i]
+                                    val attrName2 = targetElement.attributeValue("name")
+                                    if (attrName == attrName2) {
+                                        if (targetElement.parent.remove(targetElement)) {
+                                            targetElements.removeAt(i)
+                                            targetElements.add(i, element.clone() as Element)
+                                            changeCount++
+                                            printResult("update >>> ${targetElement.qName.name} >>> $attrName2")
+                                        }
+                                        break
                                     }
-                                    break
                                 }
                             }
+                            if (changeCount > 0) {
+                                DomXmlUtils.updateXml(targetDocument, targetFile.absolutePath)
+                            }
+                            printResult("${file.name} >>> 结束")
+                            printResult("=====================================")
                         }
-                        if (changeCount > 0) {
-                            DomXmlUtils.updateXml(targetDocument, targetFile.absolutePath)
-                        }
-                        printResult("${file.name} >>> 结束")
-                        printResult("=====================================")
                     }
                 }
+                updateProgressBar()
             }
         }
     }
@@ -173,6 +267,8 @@ class AutoWindow : JFrame() {
     private fun cmd(stam: String, s: String) {
         singleThreadExecutor.execute {
             printResult("自动打包开始 \n >>> $s")
+            var addCount = 0
+            var readLineNumber = 0
             try {
                 val processBuilder = ProcessBuilder().command("cmd.exe", "/c", stam)
                 val process: Process = processBuilder.start()
@@ -180,17 +276,25 @@ class AutoWindow : JFrame() {
                 //循环等待进程输出，判断进程存活则循环获取输出流数据
                 while (process.isAlive) {
                     while (bufferedReader.ready()) {
-                        val log = bufferedReader.readLine()
-                        printResult(log)
+                        printResult(bufferedReader.readLine())
+                        readLineNumber++
+                        // 这里为了更新进度条，先规定每15行日志输出，就更新一下，最大到 autoBuildProgressNUmber - 1 ，留一个在结束时设置
+                        if (readLineNumber % 20 == 0 && addCount < autoBuildProgressNUmber - 1) {
+                            addCount++
+                            updateProgressBar()
+                        }
                     }
                 }
                 //获取执行结果
                 process.waitFor()
             } catch (e: Exception) {
                 e.printStackTrace()
-                printResult("自动打包错误 \n >>> $s \n" + e.message)
+                printResult(">>> " + e.message)
+                printResult("自动打包错误 >>> $s")
+                updateProgressBar(autoBuildProgressNUmber - addCount)
             } finally {
-                printResult("自动打包结束")
+                printResult("自动打包结束 >>> $s")
+                updateProgressBar(autoBuildProgressNUmber - addCount)
             }
         }
     }

@@ -3,6 +3,7 @@ package cn.mtjsoft.utils
 import java.io.*
 import java.util.*
 
+
 /**
  * 文件工具
  *
@@ -30,6 +31,18 @@ object FileUtils {
             } catch (e: IOException) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    fun writeStringToFile(filePath: String, saveString: String) {
+        try {
+            val fw = FileWriter(filePath, true)
+            val bw = BufferedWriter(fw)
+            bw.write(saveString)
+            bw.close()
+            fw.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
