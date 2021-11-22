@@ -17,6 +17,7 @@ java {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation 'net.sourceforge.argparse4j:argparse4j:0.9.0'
     implementation files('libs/dom4j-2.0.3.jar')
     implementation files('libs/forms_rt.jar')
     implementation files('libs/forms-1.1-preview.jar')

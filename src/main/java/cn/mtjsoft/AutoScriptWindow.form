@@ -33,7 +33,7 @@
             </constraints>
             <properties>
               <horizontalAlignment value="10"/>
-              <text value="C:\\Users\\Administrator\\Desktop\\res"/>
+              <text value=""/>
             </properties>
           </component>
           <component id="f673c" class="javax.swing.JLabel">
@@ -51,7 +51,7 @@
               </grid>
             </constraints>
             <properties>
-              <text value="D:\\AndroidProjects\\securityhouse-android"/>
+              <text value=""/>
             </properties>
           </component>
           <component id="e26b4" class="javax.swing.JButton" binding="rpBtn">

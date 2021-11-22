@@ -48,13 +48,13 @@ public class AutoScriptWindow {
         panel1.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         rp = new JTextField();
         rp.setHorizontalAlignment(10);
-        rp.setText("C:\\\\Users\\\\Administrator\\\\Desktop\\\\res");
+        rp.setText("");
         panel1.add(rp, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label2 = new JLabel();
         label2.setText("目标项目目录");
         panel1.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         pp = new JTextField();
-        pp.setText("D:\\\\AndroidProjects\\\\securityhouse-android");
+        pp.setText("");
         panel1.add(pp, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         rpBtn = new JButton();
         rpBtn.setIcon(new ImageIcon(getClass().getResource("/image/choosefile.png")));

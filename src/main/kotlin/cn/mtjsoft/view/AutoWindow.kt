@@ -41,7 +41,13 @@ class AutoWindow : JFrame() {
         iconImage = icon
     }
 
-    fun showWindow() {
+    fun showWindow(
+        resPath: String?,
+        projectPath: String?,
+        debugString: String?,
+        alphaString: String?,
+        releaseString: String?
+    ) {
         isResizable = true
         contentPane.add(AutoScriptWindow().apply {
             autoScriptWindow = this
@@ -60,6 +66,17 @@ class AutoWindow : JFrame() {
         setLocationRelativeTo(null)
         isVisible = true
         addWindowCloseListener(this)
+        autoScriptWindow.apply {
+            if (!resPath.isNullOrEmpty()) {
+                rp.text = resPath
+            }
+            if (!projectPath.isNullOrEmpty()) {
+                pp.text = projectPath
+            }
+            debug.isSelected = !debugString.isNullOrEmpty()
+            alpha.isSelected = !alphaString.isNullOrEmpty()
+            release.isSelected = !releaseString.isNullOrEmpty()
+        }
     }
 
     /**
