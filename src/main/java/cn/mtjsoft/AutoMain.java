@@ -19,12 +19,15 @@ public class AutoMain {
         Namespace ns = start(args);
         String resPath = "";
         String projectPath = "";
-        String debug = "";
-        String alpha = "";
-        String release = "";
+        Boolean debug = false;
+        Boolean alpha = false;
+        Boolean release = false;
         if (ns != null) {
             resPath = ns.getString("resPath");
             projectPath = ns.getString("projectPath");
+            debug = ns.getBoolean("assembleDebug");
+            alpha = ns.getBoolean("assembleAlpha");
+            release = ns.getBoolean("assembleRelease");
         }
         new AutoWindow().showWindow(resPath, projectPath, debug, alpha, release);
     }
@@ -35,9 +38,33 @@ public class AutoMain {
      */
     private static Namespace start(String[] args) {
         ArgumentParser parser =
-                ArgumentParsers.newFor("").build().defaultHelp(true).description("Calculate checksum of given files.");
-        parser.addArgument("-rp", "--resPath").help("资源文件路径");
-        parser.addArgument("-pp", "--projectPath").help("项目路径");
+                ArgumentParsers.newFor("AutoScript").build().defaultHelp(true).description("Calculate checksum of given files.");
+        parser.addArgument("-rp", "--resPath")
+                .required(true)
+                .type(String.class)
+                .dest("resPath")
+                .help("资源文件路径");
+        parser.addArgument("-pp", "--projectPath")
+                .required(true)
+                .type(String.class)
+                .dest("projectPath")
+                .help("项目路径");
+        parser.addArgument("-debug", "--assembleDebug")
+                .type(Boolean.class)
+                .nargs("?")
+                .setConst(true).dest("assembleDebug")
+                .help("自动Debug打包,传空字符默认项目路径");
+        parser.addArgument("-alpha", "--assembleAlpha")
+                .type(Boolean.class).nargs("?")
+                .setConst(true)
+                .dest("assembleAlpha")
+                .help("自动Alpha打包,传空字符默认项目路径");
+        parser.addArgument("-release", "--assembleRelease")
+                .type(Boolean.class)
+                .nargs("?")
+                .setConst(true)
+                .dest("assembleRelease")
+                .help("自动Release打包,传空字符默认项目路径");
         Namespace ns = null;
         try {
             ns = parser.parseArgs(args);

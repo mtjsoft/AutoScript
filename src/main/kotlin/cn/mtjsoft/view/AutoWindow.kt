@@ -44,9 +44,9 @@ class AutoWindow : JFrame() {
     fun showWindow(
         resPath: String?,
         projectPath: String?,
-        debugString: String?,
-        alphaString: String?,
-        releaseString: String?
+        debugOpen: Boolean?,
+        alphaOpen: Boolean?,
+        releaseOpen: Boolean?
     ) {
         isResizable = true
         contentPane.add(AutoScriptWindow().apply {
@@ -73,9 +73,9 @@ class AutoWindow : JFrame() {
             if (!projectPath.isNullOrEmpty()) {
                 pp.text = projectPath
             }
-            debug.isSelected = !debugString.isNullOrEmpty()
-            alpha.isSelected = !alphaString.isNullOrEmpty()
-            release.isSelected = !releaseString.isNullOrEmpty()
+            debug.isSelected = debugOpen != null && debugOpen
+            alpha.isSelected = alphaOpen != null && alphaOpen
+            release.isSelected = releaseOpen != null && releaseOpen
         }
     }
 
