@@ -28,8 +28,12 @@
 4. 按需勾选 自动打包（可同时勾选多个，或者不选）
 5. 点击开始。执行结果栏，会实时显示执行的结果日志
 6. 执行结束后，执行的日志文件会自动保存到 第二步选择的目录下面
+
    ![在这里插入图片描述](https://img-blog.csdnimg.cn/7c89c331ec5b4ce491b022dc83aca1f0.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA5biF5rCU55qE6ZOF56yU,size_18,color_FFFFFF,t_70,g_se,x_16)
+
+
 ### 主要开发流程
+
 1. 待替换的资源 (文件夹:　/res/values/strings.xml)
 2. 目标项目
 3. 资源替换 (遍历资源，替换到目标项目中)
@@ -37,6 +41,7 @@
 5. 重置 （执行 git reset --hard）
 
 ## 依赖库
+
 `argparse4j`: Java命令行参数解析器
 
 `dom4j`: XML文件解析
