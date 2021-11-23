@@ -308,7 +308,6 @@ class AutoWindow : JFrame() {
                 e.printStackTrace()
                 printResult(">>> " + e.message)
                 printResult("自动打包错误 >>> $s")
-                updateProgressBar(autoBuildProgressNUmber - addCount)
             } finally {
                 printResult("自动打包结束 >>> $s")
                 updateProgressBar(autoBuildProgressNUmber - addCount)
