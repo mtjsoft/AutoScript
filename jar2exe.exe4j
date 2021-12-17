@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <exe4j version="6.0.2" transformSequenceNumber="2">
-  <directoryPresets config="C:/Program Files/Java/jre1.8.0_211" />
+  <directoryPresets config="D:/IdeaProjects/AutoScript/build/libs" />
   <application name="资源替换自动打包脚本" distributionSourceDir="D:/exe4j_exe">
     <languages>
       <principalLanguage id="en" customLocalizationFile="" />
@@ -24,7 +24,7 @@
       <envVar name="JDK_HOME" />
     </searchSequence>
     <classPath>
-      <archive location="D:/IdeaProjects/AutoScript/build/libs/AutoScript-1.0.0.jar" failOnError="false" />
+      <archive location="D:/IdeaProjects/AutoScript/build/libs/AutoScript-1.0.1.jar" failOnError="false" />
     </classPath>
     <modulePath />
     <nativeLibraryDirectories />

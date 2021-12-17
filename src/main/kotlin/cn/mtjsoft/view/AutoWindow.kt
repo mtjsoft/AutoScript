@@ -11,6 +11,7 @@ import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
 import java.io.BufferedReader
 import java.io.File
+import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
@@ -36,7 +37,7 @@ class AutoWindow : JFrame() {
     private var ppPath = ""
 
     init {
-        title = "资源替换自动打包工具v1.0.0"
+        title = "资源替换自动打包工具v1.0.1"
         icon = Toolkit.getDefaultToolkit().createImage(this.javaClass.getResource("/image/icon72.png"))
         iconImage = icon
     }
@@ -226,6 +227,12 @@ class AutoWindow : JFrame() {
                 if (targetFile.exists() && targetFile.delete()) {
                     FileUtils.copy(file.absolutePath, targetFile.absolutePath)
                     printResult("$name >>> copy 【" + file.name + "】")
+                    //
+                    moveFile(
+                        file.absolutePath,
+                        resPath + File.separator + "replaceFiles/" + name + File.separator + file.name,
+                        true
+                    )
                 }
                 updateProgressBar()
             }
@@ -270,6 +277,12 @@ class AutoWindow : JFrame() {
                             }
                             if (changeCount > 0) {
                                 DomXmlUtils.updateXml(targetDocument, targetFile.absolutePath)
+                                //
+                                moveFile(
+                                    file.absolutePath,
+                                    resPath + File.separator + "replaceFiles/" + name + File.separator + file.name,
+                                    true
+                                )
                             }
                             printResult("${file.name} >>> 结束")
                             printResult("=====================================")
@@ -311,6 +324,26 @@ class AutoWindow : JFrame() {
             } finally {
                 printResult("自动打包结束 >>> $s")
                 updateProgressBar(autoBuildProgressNUmber - addCount)
+            }
+        }
+    }
+
+    private fun moveFile(source: String, dest: String, isDeleteSource: Boolean = true) {
+        val file = File(dest)
+        if (!file.parentFile.exists() && !file.parentFile.mkdirs()) {
+            return
+        }
+        if (!file.exists()) {
+            try {
+                if (file.createNewFile()) {
+                    FileUtils.copy(source, dest)
+                    if (isDeleteSource) {
+                        // 删除源文件
+                        File(source).delete()
+                    }
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }

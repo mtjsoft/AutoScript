@@ -40,12 +40,12 @@ public class AutoMain {
         ArgumentParser parser =
                 ArgumentParsers.newFor("AutoScript").build().defaultHelp(true).description("Calculate checksum of given files.");
         parser.addArgument("-rp", "--resPath")
-                .required(true)
+                .required(false)
                 .type(String.class)
                 .dest("resPath")
                 .help("资源文件路径");
         parser.addArgument("-pp", "--projectPath")
-                .required(true)
+                .required(false)
                 .type(String.class)
                 .dest("projectPath")
                 .help("项目路径");
