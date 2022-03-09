@@ -43,28 +43,28 @@ public class AutoMain {
                 .required(false)
                 .type(String.class)
                 .dest("resPath")
-                .help("×ÊÔ´ÎÄ¼þÂ·¾¶");
+                .help("èµ„æºæ–‡ä»¶è·¯å¾„");
         parser.addArgument("-pp", "--projectPath")
                 .required(false)
                 .type(String.class)
                 .dest("projectPath")
-                .help("ÏîÄ¿Â·¾¶");
+                .help("é¡¹ç›®è·¯å¾„");
         parser.addArgument("-debug", "--assembleDebug")
                 .type(Boolean.class)
                 .nargs("?")
                 .setConst(true).dest("assembleDebug")
-                .help("×Ô¶¯Debug´ò°ü,´«¿Õ×Ö·ûÄ¬ÈÏÏîÄ¿Â·¾¶");
+                .help("å¼€å¯è‡ªåŠ¨Debugæ‰“åŒ…");
         parser.addArgument("-alpha", "--assembleAlpha")
                 .type(Boolean.class).nargs("?")
                 .setConst(true)
                 .dest("assembleAlpha")
-                .help("×Ô¶¯Alpha´ò°ü,´«¿Õ×Ö·ûÄ¬ÈÏÏîÄ¿Â·¾¶");
+                .help("å¼€å¯è‡ªåŠ¨Alphaæ‰“åŒ…");
         parser.addArgument("-release", "--assembleRelease")
                 .type(Boolean.class)
                 .nargs("?")
                 .setConst(true)
                 .dest("assembleRelease")
-                .help("×Ô¶¯Release´ò°ü,´«¿Õ×Ö·ûÄ¬ÈÏÏîÄ¿Â·¾¶");
+                .help("å¼€å¯è‡ªåŠ¨Releaseæ‰“åŒ…");
         Namespace ns = null;
         try {
             ns = parser.parseArgs(args);
